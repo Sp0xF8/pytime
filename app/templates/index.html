@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sp0xF8's big dick cloud</title>
+    <style>
+        
+        body { font-family: Arial, sans-serif; background-color: black;}
+        #messages { list-style-type: none; padding: 0; }
+        #messages li { padding: 8px; background: #f1f1f1; margin: 5px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: aqua;">Sp0xF8's Big Dick Cloud Radar</h1>
+
+    <div id="map_container"></div>
+
+
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        //get the center of the window
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const mapStartX = centerX - 1024 / 2;
+        const mapStartY = centerY - 1024 / 2;
+        var current_map = "";
+        var socket = io.connect('http://localhost:5000');
+
+        const mapData = {
+            "cs_italy": { PosX: -2647, PosY: 2592, Scale: 4.6 },
+            "cs_office": { PosX: -1838, PosY: 1858, Scale: 4.1 },
+            "de_ancient": { PosX: -2953, PosY: 2164, Scale: 5.0 },
+            "de_anubis": { PosX: -2796, PosY: 3328, Scale: 5.22 },
+            "de_dust2": { PosX: -2476, PosY: 3239, Scale: 4.4 },
+            "de_inferno": { PosX: -2087, PosY: 3870, Scale: 4.9 },
+            "de_mirage": { PosX: -3230, PosY: 1713, Scale: 5.0 },
+            "de_nuke": { PosX: -3453, PosY: 2887, Scale: 7.0 },
+            "de_overpass": { PosX: -4831, PosY: 1781, Scale: 5.2 },
+            "de_vertigo": { PosX: -3168, PosY: 1762, Scale: 4.0 },
+        };
+
+        function worldToMap(worldPos, mapName) {
+
+            const map = mapData[mapName];
+            if (!map) {
+                return [0, 0];
+            }
+
+
+            const { PosX, PosY, Scale } = map;
+
+            const top_left_world = [PosX, PosY];
+
+            let worldX = worldPos[0] - top_left_world[0];
+            let worldY = top_left_world[1] - worldPos[1];
+
+            let mapX = worldX / Scale
+            let mapY = worldY / Scale
+
+            return [mapX, mapY];
+        }
+
+        socket.on('connect', function() {
+            console.log('Connected to the server via WebSocket!');
+        });
+
+        socket.on('new_map',
+            function(data) {
+                //depending on the name of the map, load a specific picture
+                var name = data['name'];
+
+                // console.log(name);
+                current_map = name;
+
+                var mapcontainer = document.getElementById('map_container');
+
+
+                //remove all children
+                while (mapcontainer.firstChild) {
+                    mapcontainer.removeChild(mapcontainer.firstChild);
+                }
+
+                var mapImage = document.createElement('img');
+
+                switch(name)
+                {
+                    case "de_dust2":
+                        mapImage.src = "/static/imgs/de_dust2.png";
+                        break;
+                    case "de_inferno":
+                        mapImage.src = "/static/imgs/de_inferno.png";
+                        break;
+                    case "de_nuke":
+                        mapImage.src = "/static/imgs/de_nuke.png";
+                        break;
+                    default:
+                        mapImage.src = "/static/imgs/de_dust2.png";
+                        break;
+                }
+
+                mapImage.width = 1024;
+                mapImage.height = 1024;
+
+                mapImage.style.position = "absolute";
+                mapImage.style.left = mapStartX + "px";
+                mapImage.style.top = mapStartY + "px";
+
+                mapcontainer.appendChild(mapImage);
+
+
+                //create new canvas for the map
+                var canvas = document.createElement('canvas');
+                canvas.width = 1024;
+                canvas.height = 1024;
+                canvas.style.position = "absolute";
+                canvas.style.left = mapStartX + "px";
+                canvas.style.top = mapStartY + "px";
+                //add a ref to the canvas so we can access it later
+                canvas.id = "map_canvas";
+                mapcontainer.appendChild(canvas);
+
+            }
+        )
+
+
+        socket.on('new_players', function(players) {
+            // console.log('New players received: ');
+            // console.log(players);
+            var canvas = document.getElementById('map_canvas');
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // //convert the string to a dictionary
+            // players = JSON.parse(players);
+
+            //players is a dictionary with the player name as key and the position as value [x, y]
+            for (var player in players) {
+                var position = players[player];
+                ctx.beginPath();
+
+                //convert the world position to the map position
+                var mapPos = worldToMap(position, current_map);
+                // console.log(mapPos);
+
+                ctx.arc(mapPos[0], mapPos[1], 10, 0, 2 * Math.PI);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+                ctx.stroke();
+
+                //log player name
+                // console.log(player);
+
+                //draw player name
+                ctx.font = "20px Arial";
+                ctx.fillStyle = "white";
+                ctx.fillText(player, mapPos[0] + 10, mapPos[1] + 10);
+
+            }
+            
+        });
+
+        socket.on('disconnect', function() {
+            console.log('Disconnected from server');
+        });
+    </script>
+</body>
+</html>
