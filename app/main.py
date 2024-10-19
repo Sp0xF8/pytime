@@ -40,7 +40,7 @@ def index():
 def handle_setmap():
     # Get the posted json data in example form {"name":"map1"}
     currmap = request.get_json()
-    print(currmap)
+    # print(currmap)
     
     if currmap:
         # Broadcast the message to all connected WebSocket clients
@@ -65,7 +65,7 @@ def handle_setplayers():
     
     players = request.get_json()
 
-    print(players)
+    # print(players)
 
 
 
