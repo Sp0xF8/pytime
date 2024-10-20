@@ -65,7 +65,7 @@ def handle_setplayers():
     
     players = request.get_json()
 
-    # print(players)
+    print(players)
 
 
 
@@ -88,4 +88,4 @@ def handle_disconnect():
     print('Client disconnected!')
 
 if __name__ == '__main__':
-    socketio.run(app, host='localhost', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000)

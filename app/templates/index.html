@@ -25,7 +25,7 @@
         const mapStartX = centerX - 1024 / 2;
         const mapStartY = centerY - 1024 / 2;
         var current_map = "";
-        var socket = io.connect('http://localhost:5000');
+        var socket = io.connect('http://82.36.201.135');
 
         const mapData = {
             "cs_italy": { PosX: -2647, PosY: 2592, Scale: 4.6 },
@@ -94,6 +94,27 @@
                     case "de_nuke":
                         mapImage.src = "/static/imgs/de_nuke.png";
                         break;
+                    case "de_mirage":
+                        mapImage.src = "/static/imgs/de_mirage.png";
+                        break;
+                    case "de_overpass":
+                        mapImage.src = "/static/imgs/de_overpass.png";
+                        break;
+                    case "de_vertigo":
+                        mapImage.src = "/static/imgs/de_vertigo.png";
+                        break;
+                    case "de_ancient":
+                        mapImage.src = "/static/imgs/de_ancient.png";
+                        break;
+                    case "de_anubis":
+                        mapImage.src = "/static/imgs/de_anubis.png";
+                        break;
+                    case "cs_italy":
+                        mapImage.src = "/static/imgs/cs_italy.png";
+                        break;
+                    case "cs_office":
+                        mapImage.src = "/static/imgs/cs_office.png";
+                        break;
                     default:
                         mapImage.src = "/static/imgs/de_dust2.png";
                         break;
@@ -134,9 +155,21 @@
             // //convert the string to a dictionary
             // players = JSON.parse(players);
 
-            //players is a dictionary with the player name as key and the position as value [x, y]
+            /*{
+                "players": {
+                    "idiot1": {
+                        "pos": [-1780.55, -660.03],
+                        "team":1
+                    },
+                    "idiot2":{
+                        "pos":[-1265.88, 720.96],
+                        "team":1
+                    }
+                }
+            }
+            */
             for (var player in players) {
-                var position = players[player];
+                var position = players[player]['pos'];
                 ctx.beginPath();
 
                 //convert the world position to the map position
@@ -144,7 +177,13 @@
                 // console.log(mapPos);
 
                 ctx.arc(mapPos[0], mapPos[1], 10, 0, 2 * Math.PI);
-                ctx.fillStyle = 'red';
+
+                //set the color of the player
+                if (players[player]['team'] == 2) {
+                    ctx.fillStyle = 'blue';
+                } else {
+                    ctx.fillStyle = 'red';
+                }
                 ctx.fill();
                 ctx.stroke();
 
